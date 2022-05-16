@@ -9,6 +9,9 @@ class Matrix4 {
 
 	// コンストラクタ
 	Matrix4();
+
+	void IdentityMatrix4();
+
 	// 成分を指定しての生成
 	Matrix4(
 	  float m00, float m01, float m02, float m03,
@@ -18,4 +21,9 @@ class Matrix4 {
 
 	// 代入演算子オーバーロード
 	Matrix4& operator*=(const Matrix4& m2);
+
+	Matrix4& operator*(float s);
 };
+
+
+
