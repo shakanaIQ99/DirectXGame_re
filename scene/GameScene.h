@@ -56,8 +56,8 @@ class GameScene {
 	
 
 	
-	WorldTransform worldTransform_s[50];
-	WorldTransform worldTransform_s2[50];
+	WorldTransform worldTransform_;
+	
 
 	ViewProjection viewProjection_;
 

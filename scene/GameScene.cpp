@@ -31,11 +31,10 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
-	for (int i = 0; i < 50; i++)
-	{
-		worldTransform_s[i].Initialize();
-		worldTransform_s2[i].Initialize();
-	}
+	
+	worldTransform_.Initialize();
+	
+	
 	viewProjection_.Initialize();
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -45,39 +44,26 @@ void GameScene::Initialize() {
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 
 	//x,y,z方向のスケーリングを設定
-	for (int i = 0; i < 50; i++)
-	{
+	
+
+	worldTransform_.scale_ = {2,2,2};
+
+	worldTransform_.rotation_ = {0,0,0};
+
+	worldTransform_.translation_ = {1,1,1};
+
+	
 
 
-		worldTransform_s[i].scale_ = {2,2,2};
+	worldTransform_.matWorld_.IdentityMatrix4();
 
-		worldTransform_s[i].rotation_ = {0,0,0};
+	worldTransform_.matWorld_ *= ChengeScr(worldTransform_.scale_);
+	worldTransform_.matWorld_ *= ChengeRot(worldTransform_.rotation_);
+	worldTransform_.matWorld_ *= ChengePos(worldTransform_.translation_);
 
-		worldTransform_s[i].translation_ = {(float)-20+(i*4),-7,-30};
-
-		worldTransform_s2[i].scale_ = { 2,2,2 };
-
-		worldTransform_s2[i].rotation_ = { 0,0,0 };
-
-		worldTransform_s2[i].translation_ = { (float)-20 + (i * 4),7,-30 };
-
-
-
-		worldTransform_s[i].matWorld_.IdentityMatrix4();
-
-		worldTransform_s[i].matWorld_ *= ChengeScr(worldTransform_s[i].scale_);
-		worldTransform_s[i].matWorld_ *= ChengeRot(worldTransform_s[i].rotation_);
-		worldTransform_s[i].matWorld_ *= ChengePos(worldTransform_s[i].translation_);
-
-		worldTransform_s2[i].matWorld_.IdentityMatrix4();
-
-		worldTransform_s2[i].matWorld_ *= ChengeScr(worldTransform_s2[i].scale_);
-		worldTransform_s2[i].matWorld_ *= ChengeRot(worldTransform_s2[i].rotation_);
-		worldTransform_s2[i].matWorld_ *= ChengePos(worldTransform_s2[i].translation_);
-
-		worldTransform_s[i].TransferMatrix();
-		worldTransform_s2[i].TransferMatrix();
-	}
+	worldTransform_.TransferMatrix();
+	
+	
 }
 
 void GameScene::Update() 
@@ -115,11 +101,9 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	//3Dモデル描画
-	for (int i = 0; i < 50; i++)
-	{
-		model_->Draw(worldTransform_s[i], viewProjection_, textureHandle_);
-		model_->Draw(worldTransform_s2[i], viewProjection_, textureHandle_);
-	}
+	
+	model_->Draw(worldTransform_,debugCamera_->GetViewProjection(), textureHandle_);
+	
 
 	
 
