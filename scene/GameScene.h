@@ -56,12 +56,14 @@ class GameScene {
 	
 
 	
-	WorldTransform worldTransform_;
+	WorldTransform worldTransforms_[100];
 	
 
 	ViewProjection viewProjection_;
 
 	DebugCamera* debugCamera_ = nullptr;
+
+	float viewAngle = 0.0f;
 
 
 

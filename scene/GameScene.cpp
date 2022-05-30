@@ -3,6 +3,7 @@
 #include <cassert>
 #include"AxisIndicator.h"
 #include "PrimitiveDrawer.h"
+#include<random>
 
 const float XM_PI = 3.14592654f;
 
@@ -31,45 +32,95 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
+
+	std::random_device seed_gen;
+
+	std::mt19937_64 engine(seed_gen());
+
+	std::uniform_real_distribution<float> RadDist(0, ConvertRad(180.0f));
+	std::uniform_real_distribution<float> TraDist(-10,10);
+
 	
-	worldTransform_.Initialize();
-	
-	
-	viewProjection_.Initialize();
+
+
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
 
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
+	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
 
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 
 	//x,y,z方向のスケーリングを設定
+	for (WorldTransform& worldTransform : worldTransforms_)
+	{
+		worldTransform.Initialize();
+
+		worldTransform.scale_ = { 1,1,1 };
+
+		worldTransform.rotation_ = { RadDist(engine),RadDist(engine),RadDist(engine) };
+
+		worldTransform.translation_ = { TraDist(engine),TraDist(engine),TraDist(engine) };
+
+
+
+		worldTransform.matWorld_.IdentityMatrix4();
+
+		worldTransform.matWorld_ *= ChengeScr(worldTransform.scale_);
+		worldTransform.matWorld_ *= ChengeRot(worldTransform.rotation_);
+		worldTransform.matWorld_ *= ChengePos(worldTransform.translation_);
+
+		worldTransform.TransferMatrix();
+
+
+
+	}
+	//viewProjection_.eye = { 0,0,-50 };
+	viewProjection_.target = { 10,0,0 };
+	viewProjection_.up = { cosf(ConvertRad(45.0f)),sinf(ConvertRad(45.0f)),0 };
+	
+	
+	viewProjection_.Initialize();
 	
 
-	worldTransform_.scale_ = {2,2,2};
-
-	worldTransform_.rotation_ = {0,0,0};
-
-	worldTransform_.translation_ = {1,1,1};
-
-	
-
-
-	worldTransform_.matWorld_.IdentityMatrix4();
-
-	worldTransform_.matWorld_ *= ChengeScr(worldTransform_.scale_);
-	worldTransform_.matWorld_ *= ChengeRot(worldTransform_.rotation_);
-	worldTransform_.matWorld_ *= ChengePos(worldTransform_.translation_);
-
-	worldTransform_.TransferMatrix();
 	
 	
 }
 
 void GameScene::Update() 
 {
-	
+	Vector3 move = Vector3();
 
+	const float kEyeSpeed = 0.2f;
+
+	const float kUpRotSpeed = 0.05f;
+
+	if (input_->PushKey(DIK_SPACE))
+	{
+		viewAngle += kUpRotSpeed;
+
+		viewAngle = fmodf(viewAngle, XM_PI * 2.0f);
+	}
+
+	/*if (input_->PushKey(DIK_W))
+	{
+		move.z += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_S))
+	{
+		move.z -= kEyeSpeed;
+	}*/
+	if (input_->PushKey(DIK_LEFT))
+	{
+		move.x -= kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_RIGHT))
+	{
+		move.x += kEyeSpeed;
+	}
+
+	viewProjection_.up = { cosf(viewAngle),sinf(viewAngle),0 };
+	viewProjection_.target += move;
+	viewProjection_.UpdateMatrix();
 	
 	debugCamera_->Update();
 }
@@ -101,9 +152,10 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	//3Dモデル描画
-	
-	model_->Draw(worldTransform_,debugCamera_->GetViewProjection(), textureHandle_);
-	
+	for (WorldTransform& worldTransform : worldTransforms_)
+	{
+		model_->Draw(worldTransform, viewProjection_, textureHandle_);
+	}
 
 	
 
