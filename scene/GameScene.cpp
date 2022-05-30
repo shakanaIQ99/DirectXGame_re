@@ -74,11 +74,13 @@ void GameScene::Initialize() {
 
 
 	}
-	//viewProjection_.eye = { 0,0,-50 };
-	viewProjection_.target = { 10,0,0 };
-	viewProjection_.up = { cosf(ConvertRad(45.0f)),sinf(ConvertRad(45.0f)),0 };
 	
+
 	
+
+	viewProjection_.nearZ = 52.0f;
+	viewProjection_.farZ = 53.0f;
+
 	viewProjection_.Initialize();
 	
 
@@ -88,41 +90,55 @@ void GameScene::Initialize() {
 
 void GameScene::Update() 
 {
-	Vector3 move = Vector3();
+	//Vector3 move = Vector3();
 
-	const float kEyeSpeed = 0.2f;
+	//const float kEyeSpeed = 0.2f;
 
-	const float kUpRotSpeed = 0.05f;
+	//const float kUpRotSpeed = 0.05f;
 
-	if (input_->PushKey(DIK_SPACE))
+	//if (input_->PushKey(DIK_SPACE))
+	//{
+	//	viewAngle += kUpRotSpeed;
+
+	//	viewAngle = fmodf(viewAngle, XM_PI * 2.0f);
+	//}
+
+	///*if (input_->PushKey(DIK_W))
+	//{
+	//	move.z += kEyeSpeed;
+	//}
+	//if (input_->PushKey(DIK_S))
+	//{
+	//	move.z -= kEyeSpeed;
+	//}*/
+	//if (input_->PushKey(DIK_LEFT))
+	//{
+	//	move.x -= kEyeSpeed;
+	//}
+	//if (input_->PushKey(DIK_RIGHT))
+	//{
+	//	move.x += kEyeSpeed;
+	//}
+
+	//viewProjection_.up = { cosf(viewAngle),sinf(viewAngle),0 };
+	//viewProjection_.target += move;
+
+	if (input_->PushKey(DIK_UP))
 	{
-		viewAngle += kUpRotSpeed;
-
-		viewAngle = fmodf(viewAngle, XM_PI * 2.0f);
+		viewProjection_.nearZ += 1.0f;
+	}
+	if (input_->PushKey(DIK_DOWN))
+	{
+		viewProjection_.nearZ -= 1.0f;
 	}
 
-	/*if (input_->PushKey(DIK_W))
-	{
-		move.z += kEyeSpeed;
-	}
-	if (input_->PushKey(DIK_S))
-	{
-		move.z -= kEyeSpeed;
-	}*/
-	if (input_->PushKey(DIK_LEFT))
-	{
-		move.x -= kEyeSpeed;
-	}
-	if (input_->PushKey(DIK_RIGHT))
-	{
-		move.x += kEyeSpeed;
-	}
 
-	viewProjection_.up = { cosf(viewAngle),sinf(viewAngle),0 };
-	viewProjection_.target += move;
+
 	viewProjection_.UpdateMatrix();
 	
 	debugCamera_->Update();
+	debugText_->SetPos(150, 110);
+	debugText_->Printf("%f", viewProjection_.fovAngleY);
 }
 
 void GameScene::Draw() {
