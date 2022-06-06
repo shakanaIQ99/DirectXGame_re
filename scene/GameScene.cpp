@@ -9,12 +9,6 @@ const float XM_PI = 3.14592654f;
 
 float ConvertRad(float dosuu);
 
-Matrix4 ChengeRot(Vector3 Rot);
-
-Matrix4 ChengeScr(Vector3 Scr);
-
-Matrix4 ChengePos(Vector3 Pos);
-
 GameScene::GameScene() {}
 
 GameScene::~GameScene() 
@@ -30,7 +24,7 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
-	textureHandle_ = TextureManager::Load("mario.jpg");
+	textureHandle_ = TextureManager::Load("genba.jpg");
 	model_ = Model::Create();
 
 	std::random_device seed_gen;
@@ -51,7 +45,7 @@ void GameScene::Initialize() {
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 
 	//x,y,z方向のスケーリングを設定
-	for (WorldTransform& worldTransform : worldTransforms_)
+	/*for (WorldTransform& worldTransform : worldTransforms_)
 	{
 		worldTransform.Initialize();
 
@@ -69,17 +63,50 @@ void GameScene::Initialize() {
 		worldTransform.matWorld_ *= ChengeRot(worldTransform.rotation_);
 		worldTransform.matWorld_ *= ChengePos(worldTransform.translation_);
 
-		worldTransform.TransferMatrix();
 
 
 
-	}
+	}*/
+
+	worldTransforms_[kRoot].Initialize();
+
+	worldTransforms_[kSpine].translation_ = { 0,4.5f,0 };
+	worldTransforms_[kSpine].parent_ = &worldTransforms_[kRoot];
+	worldTransforms_[kSpine].Initialize();
+
+	worldTransforms_[kChest].translation_ = { 0,0,0 };
+	worldTransforms_[kChest].parent_ = &worldTransforms_[kSpine];
+	worldTransforms_[kChest].Initialize();
+
+	worldTransforms_[kHead].translation_ = { 0,4.5f,0 };
+	worldTransforms_[kHead].parent_ = &worldTransforms_[kChest];
+	worldTransforms_[kHead].Initialize();
+
+
+	worldTransforms_[kArmL].translation_ = { -4.5f,0,0 };
+	worldTransforms_[kArmL].parent_ = &worldTransforms_[kChest];
+	worldTransforms_[kArmL].Initialize();
+
+	worldTransforms_[kArmR].translation_ = { 4.5f,0,0 };
+	worldTransforms_[kArmR].parent_ = &worldTransforms_[kChest];
+	worldTransforms_[kArmR].Initialize();
+
+	worldTransforms_[kHip].translation_ = { 0,-4.5f,0 };
+	worldTransforms_[kHip].parent_ = &worldTransforms_[kSpine];
+	worldTransforms_[kHip].Initialize();
+	
+	worldTransforms_[kLegL].translation_ = { -4.5f,-4.5f,0 };
+	worldTransforms_[kLegL].parent_ = &worldTransforms_[kHip];
+	worldTransforms_[kLegL].Initialize();
+
+	worldTransforms_[kLegR].translation_ = { 4.5f,-4.5f,0 };
+	worldTransforms_[kLegR].parent_ = &worldTransforms_[kHip];
+	worldTransforms_[kLegR].Initialize();
+
+	
 	
 
 	
-
-	viewProjection_.nearZ = 52.0f;
-	viewProjection_.farZ = 53.0f;
 
 	viewProjection_.Initialize();
 	
@@ -90,9 +117,9 @@ void GameScene::Initialize() {
 
 void GameScene::Update() 
 {
-	//Vector3 move = Vector3();
+	Vector3 move = Vector3();
 
-	//const float kEyeSpeed = 0.2f;
+	const float kEyeSpeed = 0.2f;
 
 	//const float kUpRotSpeed = 0.05f;
 
@@ -111,26 +138,42 @@ void GameScene::Update()
 	//{
 	//	move.z -= kEyeSpeed;
 	//}*/
-	//if (input_->PushKey(DIK_LEFT))
-	//{
-	//	move.x -= kEyeSpeed;
-	//}
-	//if (input_->PushKey(DIK_RIGHT))
-	//{
-	//	move.x += kEyeSpeed;
-	//}
+	if (input_->PushKey(DIK_LEFT))
+	{
+		move.x -= kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_RIGHT))
+	{
+		move.x += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_UP))
+	{
+		move.y += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_DOWN))
+	{
+		move.y -= kEyeSpeed;
+	}
+	worldTransforms_[kRoot].translation_ += move;
 
+	for (int i = 0; i < 9; i++)
+	{
+		worldTransforms_[i].UpdateMatrix();
+		worldTransforms_[i].TransferMatrix();
+	}
+
+	
 	//viewProjection_.up = { cosf(viewAngle),sinf(viewAngle),0 };
 	//viewProjection_.target += move;
 
-	if (input_->PushKey(DIK_UP))
+	/*if (input_->PushKey(DIK_UP))
 	{
 		viewProjection_.nearZ += 1.0f;
 	}
 	if (input_->PushKey(DIK_DOWN))
 	{
 		viewProjection_.nearZ -= 1.0f;
-	}
+	}*/
 
 
 
@@ -168,11 +211,15 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	//3Dモデル描画
-	for (WorldTransform& worldTransform : worldTransforms_)
+	/*for (WorldTransform& worldTransform : worldTransforms_)
 	{
 		model_->Draw(worldTransform, viewProjection_, textureHandle_);
-	}
+	}*/
 
+	for (int i = 1; i < 9; i++)
+	{
+		model_->Draw(worldTransforms_[i], viewProjection_, textureHandle_);
+	}
 	
 
 	//PrimitiveDrawer::GetInstance()->DrawLine3d(Vector3(100.0f, 0, 0), Vector3(-100.0f, 0, 0), Vector4(1, 0, 0, 1));
@@ -207,59 +254,3 @@ float ConvertRad(float dosuu)
 	return dosuu * (XM_PI / 180.0f);
 }
 
-Matrix4 ChengeRot(Vector3 Rot)
-{
-	
-
-	Matrix4 matRot;
-	Matrix4 matRotX, matRotY, matRotZ;
-
-	matRot.IdentityMatrix4();
-	matRotX.IdentityMatrix4();
-	matRotY.IdentityMatrix4();
-	matRotZ.IdentityMatrix4();
-
-	matRotX.m[1][1] = cos(Rot.x);
-	matRotX.m[1][2] = sin(Rot.x);
-	matRotX.m[2][1] = -sin(Rot.x);
-	matRotX.m[2][2] = cos(Rot.x);
-
-	matRotY.m[0][0] = cos(Rot.y);
-	matRotY.m[0][2] = -sin(Rot.y);
-	matRotY.m[2][0] = sin(Rot.y);
-	matRotY.m[2][2] = cos(Rot.y);
-
-	matRotZ.m[0][0] = cos(Rot.z);
-	matRotZ.m[0][1] = sin(Rot.z);
-	matRotZ.m[1][0] = -sin(Rot.z);
-	matRotZ.m[1][1] = cos(Rot.z);
-
-	matRot *= matRotZ;
-	matRot *= matRotX;
-	matRot *= matRotY;
-
-	return matRot;
-}
-
-Matrix4 ChengeScr(Vector3 Scr)
-{
-	Matrix4 matscale;
-	matscale.IdentityMatrix4();
-
-	matscale.m[0][0] = Scr.x;
-	matscale.m[1][1] = Scr.y;
-	matscale.m[2][2] = Scr.z;
-
-	return matscale;
-}
-
-Matrix4 ChengePos(Vector3 Pos)
-{
-	Matrix4 matTrans = MathUtility::Matrix4Identity();
-	
-	matTrans.m[3][0] += Pos.x;
-	matTrans.m[3][1] += Pos.y;
-	matTrans.m[3][2] += Pos.z;
-
-	return matTrans;
-}

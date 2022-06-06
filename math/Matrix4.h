@@ -12,6 +12,8 @@ class Matrix4 {
 
 	void IdentityMatrix4();
 
+
+
 	// 成分を指定しての生成
 	Matrix4(
 	  float m00, float m01, float m02, float m03,

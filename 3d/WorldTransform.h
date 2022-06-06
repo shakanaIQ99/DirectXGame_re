@@ -45,4 +45,12 @@ struct WorldTransform {
 	/// 行列を転送する
 	/// </summary>
 	void TransferMatrix();
+
+	void UpdateMatrix();
+
+	Matrix4 ChengeRot();
+
+	Matrix4 ChengeScr();
+
+	Matrix4 ChengePos();
 };

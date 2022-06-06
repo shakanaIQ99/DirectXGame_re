@@ -44,6 +44,21 @@ class GameScene {
 	/// </summary>
 	void Draw();
 
+
+	enum PratID
+	{
+		kRoot,
+		kSpine,
+		kChest,
+		kHead,
+		kArmL,
+		kArmR,
+		kHip,
+		kLegL,
+		kLegR
+	};
+
+
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
