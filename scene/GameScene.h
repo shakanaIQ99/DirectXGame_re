@@ -69,14 +69,22 @@ class GameScene {
 
 	Model* model_ = nullptr;
 	
+	enum walk_mode
+	{
+		camera_wasd,
+		bio_wasd
+	};
+	
+	int mode;
 
-	
-	WorldTransform worldTransforms_[100];
-	
+	WorldTransform worldTransforms_[9];
+	WorldTransform worldTransform_2[100];
 
 	ViewProjection viewProjection_;
 
 	DebugCamera* debugCamera_ = nullptr;
+
+
 
 	float viewAngle = 0.0f;
 

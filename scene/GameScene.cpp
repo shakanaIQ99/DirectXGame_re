@@ -44,29 +44,19 @@ void GameScene::Initialize() {
 
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 
-	//x,y,z方向のスケーリングを設定
-	/*for (WorldTransform& worldTransform : worldTransforms_)
-	{
-		worldTransform.Initialize();
+	for (size_t i = 0; i < _countof(worldTransform_2); i++) {
+		// x,y,z方向のスケーリングを特定
+		worldTransform_2[i].scale_ = { 1.0f, 1.0f, 1.0f };
+		// x,y,z軸周りの回転角を設定
+		//
+		worldTransform_2[i].translation_ = { 0,0,float(i) * 10.0f };
 
-		worldTransform.scale_ = { 1,1,1 };
+		worldTransform_2[i].Initialize();
+		worldTransform_2[i].UpdateMatrix();
+		worldTransform_2[i].TransferMatrix();
+	}
 
-		worldTransform.rotation_ = { RadDist(engine),RadDist(engine),RadDist(engine) };
-
-		worldTransform.translation_ = { TraDist(engine),TraDist(engine),TraDist(engine) };
-
-
-
-		worldTransform.matWorld_.IdentityMatrix4();
-
-		worldTransform.matWorld_ *= ChengeScr(worldTransform.scale_);
-		worldTransform.matWorld_ *= ChengeRot(worldTransform.rotation_);
-		worldTransform.matWorld_ *= ChengePos(worldTransform.translation_);
-
-
-
-
-	}*/
+	
 
 	worldTransforms_[kRoot].Initialize();
 
@@ -105,13 +95,15 @@ void GameScene::Initialize() {
 
 	
 	
-
+	viewProjection_.eye = { 0,50.0f,-50.0f };
 	
 
 	viewProjection_.Initialize();
 	
 
-	
+	mode = 0;
+
+
 	
 }
 
@@ -119,7 +111,47 @@ void GameScene::Update()
 {
 	Vector3 move = Vector3();
 
+
+	Vector3 rota = Vector3();
+
+	Vector3 flont = Vector3(0, 0, 1);
+
+	Vector3 result;
+
 	const float kEyeSpeed = 0.2f;
+
+	if (input_->PushKey(DIK_LEFT))
+	{
+		viewProjection_.eye.x -= kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_RIGHT))
+	{
+		viewProjection_.eye.x += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_UP))
+	{
+		viewProjection_.eye.z += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_DOWN))
+	{
+		viewProjection_.eye.z -= kEyeSpeed;
+	}
+	const float angle = 0.02f;
+	Vector3 movepow = Vector3(kEyeSpeed, kEyeSpeed, kEyeSpeed);
+
+	viewProjection_.target.z = viewProjection_.eye.z + 50;
+	viewProjection_.target.x = viewProjection_.eye.x;
+
+	Vector3 OE = Vector3(viewProjection_.eye.x, 0, viewProjection_.eye.z);
+
+	Vector3 OE_T = viewProjection_.target - OE;
+
+	Vector3 OE_E = viewProjection_.eye - OE;
+
+	OE_E = OE_E.cross(OE_T);
+
+	OE_E.normalize();
+	OE_T.normalize();
 
 	//const float kUpRotSpeed = 0.05f;
 
@@ -130,31 +162,52 @@ void GameScene::Update()
 	//	viewAngle = fmodf(viewAngle, XM_PI * 2.0f);
 	//}
 
-	///*if (input_->PushKey(DIK_W))
-	//{
-	//	move.z += kEyeSpeed;
-	//}
-	//if (input_->PushKey(DIK_S))
-	//{
-	//	move.z -= kEyeSpeed;
-	//}*/
-	if (input_->PushKey(DIK_LEFT))
+	if (input_->TriggerKey(DIK_Q))
 	{
-		move.x -= kEyeSpeed;
+		switch (mode)
+		{
+		case camera_wasd:
+			mode = bio_wasd;
+			break;
+		case bio_wasd:
+			mode = camera_wasd;
+			break;
+		}
 	}
-	if (input_->PushKey(DIK_RIGHT))
+
+
+	if (input_->PushKey(DIK_W))
 	{
-		move.x += kEyeSpeed;
+		if (bio_wasd==mode) { move += movepow; }
+		if (camera_wasd == mode) { worldTransforms_[kRoot].translation_ += OE_T * movepow; }
 	}
-	if (input_->PushKey(DIK_UP))
+	if (input_->PushKey(DIK_S))
 	{
-		move.y += kEyeSpeed;
+		if (bio_wasd == mode) { move -= movepow; }
+		if (camera_wasd == mode) { worldTransforms_[kRoot].translation_ -= OE_T * movepow; }
 	}
-	if (input_->PushKey(DIK_DOWN))
+	if (input_->PushKey(DIK_D))
 	{
-		move.y -= kEyeSpeed;
+		if (bio_wasd == mode) { rota.y += angle; }
+		if (camera_wasd == mode) { worldTransforms_[kRoot].translation_ += OE_E * movepow; }
 	}
-	worldTransforms_[kRoot].translation_ += move;
+	if (input_->PushKey(DIK_A))
+	{
+		if (bio_wasd == mode) { rota.y -= angle; }
+		if (camera_wasd == mode) { worldTransforms_[kRoot].translation_ -= OE_E * movepow; }
+	}
+	worldTransforms_[kRoot].rotation_ += rota;
+
+	result.x =
+		cos(worldTransforms_[kRoot].rotation_.y) * flont.x +
+		sin(worldTransforms_[kRoot].rotation_.y) * flont.z;
+	result.z =
+		-sin(worldTransforms_[kRoot].rotation_.y) * flont.x +
+		cos(worldTransforms_[kRoot].rotation_.y) * flont.z;
+
+	worldTransforms_[kRoot].translation_ +=result*move;
+	
+
 
 	for (int i = 0; i < 9; i++)
 	{
@@ -176,6 +229,8 @@ void GameScene::Update()
 	}*/
 
 
+
+	
 
 	viewProjection_.UpdateMatrix();
 	
@@ -211,17 +266,16 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	//3Dモデル描画
-	/*for (WorldTransform& worldTransform : worldTransforms_)
-	{
-		model_->Draw(worldTransform, viewProjection_, textureHandle_);
-	}*/
+	
 
 	for (int i = 1; i < 9; i++)
 	{
 		model_->Draw(worldTransforms_[i], viewProjection_, textureHandle_);
 	}
 	
-
+	for (size_t i = 0; i < _countof(worldTransform_2); i++) {
+		model_->Draw(worldTransform_2[i], viewProjection_, textureHandle_);
+	}
 	//PrimitiveDrawer::GetInstance()->DrawLine3d(Vector3(100.0f, 0, 0), Vector3(-100.0f, 0, 0), Vector4(1, 0, 0, 1));
 	//PrimitiveDrawer::GetInstance()->DrawLine3d(Vector3(0, 100.0f, 0), Vector3(0, -100.0f, 0), Vector4(0, 1, 0, 1));
 	//PrimitiveDrawer::GetInstance()->DrawLine3d(Vector3(0, 0, 100.0f), Vector3(0, 0, -100.0f), Vector4(0, 0, 1, 1));

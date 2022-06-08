@@ -24,20 +24,20 @@ Matrix4 WorldTransform::ChengeRot()
 	matRotY.IdentityMatrix4();
 	matRotZ.IdentityMatrix4();
 
-	matRotX.m[1][1] =cos(rotation_.x);
-	matRotX.m[1][2] =sin(rotation_.x);
-	matRotX.m[2][1] =-sin(rotation_.x);
-	matRotX.m[2][2] =cos(rotation_.x);
+	matRotX.m[1][1] =cosf(rotation_.x);
+	matRotX.m[1][2] =sinf(rotation_.x);
+	matRotX.m[2][1] =-sinf(rotation_.x);
+	matRotX.m[2][2] =cosf(rotation_.x);
 
-	matRotY.m[0][0] = cos(rotation_.y);
-	matRotY.m[0][2] = -sin(rotation_.y);
-	matRotY.m[2][0] = sin(rotation_.y);
-	matRotY.m[2][2] = cos(rotation_.y);
+	matRotY.m[0][0] = cosf(rotation_.y);
+	matRotY.m[0][2] = -sinf(rotation_.y);
+	matRotY.m[2][0] = sinf(rotation_.y);
+	matRotY.m[2][2] = cosf(rotation_.y);
 
-	matRotZ.m[0][0] = cos(rotation_.z);
-	matRotZ.m[0][1] = sin(rotation_.z);
-	matRotZ.m[1][0] = -sin(rotation_.z);
-	matRotZ.m[1][1] = cos(rotation_.z);
+	matRotZ.m[0][0] = cosf(rotation_.z);
+	matRotZ.m[0][1] = sinf(rotation_.z);
+	matRotZ.m[1][0] = -sinf(rotation_.z);
+	matRotZ.m[1][1] = cosf(rotation_.z);
 
 	matRot *= matRotZ;
 	matRot *= matRotX;
