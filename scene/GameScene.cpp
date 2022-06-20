@@ -46,7 +46,7 @@ void GameScene::Initialize() {
 
 	for (size_t i = 0; i < _countof(worldTransform_2); i++) {
 		// x,y,z方向のスケーリングを特定
-		worldTransform_2[i].scale_ = { 1.0f, 1.0f, 1.0f };
+		worldTransform_2[i].scale_ = { 5.0f, 1.0f, 1.0f };
 		// x,y,z軸周りの回転角を設定
 		//
 		worldTransform_2[i].translation_ = { 0,0,float(i) * 10.0f };
@@ -96,7 +96,8 @@ void GameScene::Initialize() {
 	
 	
 	viewProjection_.eye = { 0,50.0f,-50.0f };
-	
+	viewProjection_.target.z = viewProjection_.eye.z + 50;
+	viewProjection_.target.x = viewProjection_.eye.x;
 
 	viewProjection_.Initialize();
 	
@@ -120,27 +121,10 @@ void GameScene::Update()
 
 	const float kEyeSpeed = 0.2f;
 
-	if (input_->PushKey(DIK_LEFT))
-	{
-		viewProjection_.eye.x -= kEyeSpeed;
-	}
-	if (input_->PushKey(DIK_RIGHT))
-	{
-		viewProjection_.eye.x += kEyeSpeed;
-	}
-	if (input_->PushKey(DIK_UP))
-	{
-		viewProjection_.eye.z += kEyeSpeed;
-	}
-	if (input_->PushKey(DIK_DOWN))
-	{
-		viewProjection_.eye.z -= kEyeSpeed;
-	}
 	const float angle = 0.02f;
 	Vector3 movepow = Vector3(kEyeSpeed, kEyeSpeed, kEyeSpeed);
 
-	viewProjection_.target.z = viewProjection_.eye.z + 50;
-	viewProjection_.target.x = viewProjection_.eye.x;
+	
 
 	Vector3 OE = Vector3(viewProjection_.eye.x, 0, viewProjection_.eye.z);
 
@@ -153,6 +137,42 @@ void GameScene::Update()
 	OE_E.normalize();
 	OE_T.normalize();
 
+	if (input_->PushKey(DIK_Z))
+	{
+		viewAngle += ConvertRad(1.0f);
+
+		viewProjection_.eye.x = -50 * sinf(viewAngle);
+		viewProjection_.eye.z = -50 * cosf(viewAngle);
+
+	}
+	if (input_->PushKey(DIK_C))
+	{
+		viewAngle -= ConvertRad(1.0f);
+		viewProjection_.eye.x = -50* sinf(viewAngle);
+		viewProjection_.eye.z = -50 * cosf(viewAngle);
+	}
+	if (input_->PushKey(DIK_LEFT))
+	{
+		viewProjection_.eye.x -= kEyeSpeed;
+		viewProjection_.target.x -= kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_RIGHT))
+	{
+		viewProjection_.eye.x += kEyeSpeed;
+		viewProjection_.target.x += kEyeSpeed;
+		
+	}
+	if (input_->PushKey(DIK_UP))
+	{
+		viewProjection_.eye.z += kEyeSpeed;
+		viewProjection_.target.z += kEyeSpeed;
+	}
+	if (input_->PushKey(DIK_DOWN))
+	{
+		viewProjection_.eye.z -= kEyeSpeed;
+		viewProjection_.target.z -= kEyeSpeed;
+	}
+	
 	//const float kUpRotSpeed = 0.05f;
 
 	//if (input_->PushKey(DIK_SPACE))

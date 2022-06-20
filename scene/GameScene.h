@@ -88,7 +88,7 @@ class GameScene {
 
 	float viewAngle = 0.0f;
 
-
+	
 
 	/// <summary>
 	/// ゲームシーン用
