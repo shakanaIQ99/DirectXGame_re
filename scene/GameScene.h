@@ -69,9 +69,9 @@ class GameScene {
 
 	Model* model_ = nullptr;
 	
-
+	static const int num = 100;
 	
-	WorldTransform worldTransforms_[100];
+	WorldTransform worldTransforms_[num];
 	
 
 	ViewProjection viewProjection_;
